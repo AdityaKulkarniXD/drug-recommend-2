@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"github.com/AdityaKulkarniXD/drug-recommend-2/internal/router"
+	"github.com/AdityaKulkarniXD/drug-recommend-2/backend/internal/router"
 	"github.com/gofiber/fiber/v2"
 )
 
