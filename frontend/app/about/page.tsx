@@ -202,13 +202,13 @@ export default function AboutPage() {
                 <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden">
                   <Image
                     src="https://images.pexels.com/photos/5327585/pexels-photo-5327585.jpeg"
-                    alt="Dr. Sarah Chen"
+                    alt="Team Member 1"
                     width={80}
                     height={80}
                     className="object-cover w-full h-full"
                   />
                 </div>
-                <CardTitle className="text-center">Dr. Sarah Chen</CardTitle>
+                <CardTitle className="text-center">Team Member 1</CardTitle>
                 <CardDescription className="text-center">
                   Medical Director
                 </CardDescription>
@@ -225,13 +225,13 @@ export default function AboutPage() {
                 <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden">
                   <Image
                     src="https://images.pexels.com/photos/6234600/pexels-photo-6234600.jpeg"
-                    alt="Dr. Marcus Johnson"
+                    alt="Team Member 2"
                     width={80}
                     height={80}
                     className="object-cover w-full h-full"
                   />
                 </div>
-                <CardTitle className="text-center">Dr. Marcus Johnson</CardTitle>
+                <CardTitle className="text-center">Team Member 2</CardTitle>
                 <CardDescription className="text-center">
                   Chief Pharmacist
                 </CardDescription>
@@ -248,13 +248,13 @@ export default function AboutPage() {
                 <div className="w-20 h-20 mx-auto mb-4 rounded-full overflow-hidden">
                   <Image
                     src="https://images.pexels.com/photos/8197558/pexels-photo-8197558.jpeg"
-                    alt="Alex Rivera"
+                    alt="Team Member 3"
                     width={80}
                     height={80}
                     className="object-cover w-full h-full"
                   />
                 </div>
-                <CardTitle className="text-center">Alex Rivera</CardTitle>
+                <CardTitle className="text-center">Team Member 3</CardTitle>
                 <CardDescription className="text-center">
                   AI Research Lead
                 </CardDescription>
