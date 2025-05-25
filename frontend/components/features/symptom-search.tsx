@@ -22,7 +22,7 @@ const mockSymptoms = [
   "Arthritis", "Allergies", "Eczema", "Ibuprofen", "Acetaminophen", "Aspirin",
   "Lisinopril", "Atorvastatin", "Levothyroxine", "Metformin", "Simvastatin",
   "Omeprazole", "Amlodipine", "Metoprolol", "Albuterol", "Gabapentin",
-  "Hydrochlorothiazide"
+  "Hydrochlorothiazide","fatigue", "weight_loss", "restlessness", "lethargy",66666666666666666666666666666666666666666666666
 ];
 
 interface SymptomSearchProps {

@@ -26,27 +26,31 @@ import {
   ClipboardList, 
   User, 
   PillIcon,
-  Stethoscope 
+  Stethoscope,
+  Loader2
 } from "lucide-react";
 import SymptomSearch from "@/components/features/symptom-search";
 
 // Mock disease mapping based on symptoms
 const SYMPTOM_TO_DISEASE = {
-  "Headache": ["Migraine", "Tension Headache", "Sinusitis"],
-  "Fever": ["Flu", "COVID-19", "Common Cold"],
-  "Cough": ["Bronchitis", "Upper Respiratory Infection", "COVID-19"],
-  "Sore Throat": ["Strep Throat", "Viral Pharyngitis", "Tonsillitis"],
-  "Runny Nose": ["Allergic Rhinitis", "Common Cold", "Sinusitis"],
-  "Fatigue": ["Chronic Fatigue Syndrome", "Depression", "Anemia"],
-  "Nausea": ["Gastroenteritis", "Food Poisoning", "Migraine"],
-  "Chest Pain": ["Angina", "Acid Reflux", "Costochondritis"],
-  "Shortness of Breath": ["Asthma", "Anxiety", "COVID-19"],
-  "Dizziness": ["Vertigo", "Low Blood Pressure", "Inner Ear Infection"],
-  "Abdominal Pain": ["Gastritis", "Appendicitis", "IBS"],
-  "Back Pain": ["Muscle Strain", "Herniated Disc", "Sciatica"],
-  "Joint Pain": ["Arthritis", "Gout", "Fibromyalgia"],
-  "Muscle Pain": ["Fibromyalgia", "Muscle Strain", "Polymyalgia"],
-  "Rash": ["Eczema", "Contact Dermatitis", "Psoriasis"],
+  "fatigue": ["Chronic Fatigue Syndrome", "Depression", "Anemia"],
+  "weight_loss": ["Diabetes", "Hyperthyroidism", "Depression"],
+  "restlessness": ["Anxiety Disorder", "ADHD", "Hyperthyroidism"],
+  "lethargy": ["Depression", "Hypothyroidism", "Anemia"],
+  "headache": ["Migraine", "Tension Headache", "Sinusitis"],
+  "fever": ["Flu", "COVID-19", "Common Cold"],
+  "cough": ["Bronchitis", "Upper Respiratory Infection", "COVID-19"],
+  "sore_throat": ["Strep Throat", "Viral Pharyngitis", "Tonsillitis"],
+  "runny_nose": ["Allergic Rhinitis", "Common Cold", "Sinusitis"],
+  "nausea": ["Gastroenteritis", "Food Poisoning", "Migraine"],
+  "chest_pain": ["Angina", "Acid Reflux", "Costochondritis"],
+  "shortness_of_breath": ["Asthma", "Anxiety", "COVID-19"],
+  "dizziness": ["Vertigo", "Low Blood Pressure", "Inner Ear Infection"],
+  "abdominal_pain": ["Gastritis", "Appendicitis", "IBS"],
+  "back_pain": ["Muscle Strain", "Herniated Disc", "Sciatica"],
+  "joint_pain": ["Arthritis", "Gout", "Fibromyalgia"],
+  "muscle_pain": ["Fibromyalgia", "Muscle Strain", "Polymyalgia"],
+  "rash": ["Eczema", "Contact Dermatitis", "Psoriasis"],
 };
 
 const steps = [
@@ -74,6 +78,10 @@ export default function SymptomsPage() {
     pregnancyStatus: "not-pregnant",
     liverKidneyStatus: "normal"
   });
+  
+  const [predictedDisease, setPredictedDisease] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
 
   // Calculate potential diseases based on symptoms
   const getPotentialDiseases = () => {
@@ -89,11 +97,48 @@ export default function SymptomsPage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  const handleNext = () => {
+  const handlePredict = async () => {
+    setIsLoading(true);
+    setError("");
+    
+    try {
+      // Make API call to backend
+      const response = await fetch("http://127.0.0.1:8000/api/predict", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ symptoms: formData.symptoms }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      setPredictedDisease(data.Disease);
+      
+      // Store the full response data in session storage to use in recommendations page
+      sessionStorage.setItem('diseaseData', JSON.stringify(data));
+      
+    } catch (err) {
+      console.error("Error predicting disease:", err);
+      setError("Failed to predict disease. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleNext = async () => {
     if (currentStep < steps.length - 1) {
+      if (currentStep === 0) {
+        // Make prediction when moving from symptoms step
+        await handlePredict();
+      }
       setCurrentStep(currentStep + 1);
       window.scrollTo(0, 0);
     } else {
+      // Navigate to recommendations page with form data
       router.push("/recommendations");
     }
   };
@@ -410,46 +455,67 @@ export default function SymptomsPage() {
         );
 
       case 4: // Potential Diagnosis
-        const potentialDiseases = getPotentialDiseases();
         return (
           <div className="space-y-6">
-            <div className="bg-muted/50 p-4 rounded-lg border border-border">
-              <h3 className="font-medium mb-4">Potential Conditions Based on Your Symptoms</h3>
-              <div className="space-y-4">
-                {potentialDiseases.length > 0 ? (
-                  potentialDiseases.map((disease, index) => (
-                    <div key={index} className="bg-background p-4 rounded-lg border border-border">
-                      <h4 className="font-medium text-primary mb-2">{disease}</h4>
-                      <p className="text-sm text-muted-foreground">
-                        This condition is suggested based on your reported symptoms. Please consult with a healthcare provider for proper diagnosis.
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground">
-                    No specific conditions identified. Please provide more symptoms for better analysis.
-                  </p>
-                )}
+            {isLoading ? (
+              <div className="flex justify-center items-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <span className="ml-2">Analyzing your symptoms...</span>
               </div>
-            </div>
-
-            <div className="bg-primary/5 p-4 rounded-lg border border-primary/20">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <h4 className="font-medium text-foreground">Important Notice</h4>
-                  <p className="text-muted-foreground text-sm">
-                    These are potential conditions based on your symptoms. This is not a diagnosis. 
-                    Always consult with a qualified healthcare provider for proper medical diagnosis and treatment.
-                  </p>
+            ) : error ? (
+              <div className="bg-destructive/10 p-4 rounded-lg border border-destructive/20">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="h-5 w-5 text-destructive mt-0.5" />
+                  <div>
+                    <h4 className="font-medium text-destructive">Error</h4>
+                    <p className="text-muted-foreground text-sm">{error}</p>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="mt-2"
+                      onClick={handlePredict}
+                    >
+                      Try Again
+                    </Button>
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-muted/50 p-4 rounded-lg border border-border">
+                  <h3 className="font-medium mb-4">Potential Condition Based on Your Symptoms</h3>
+                  {predictedDisease ? (
+                    <div className="bg-background p-4 rounded-lg border border-border">
+                      <h4 className="font-medium text-primary mb-2">{predictedDisease}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        This condition is suggested based on your reported symptoms. Please continue to the next steps to get detailed recommendations.
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-muted-foreground">
+                      No specific condition identified. Please provide more symptoms for better analysis.
+                    </p>
+                  )}
+                </div>
+
+                <div className="bg-primary/5 p-4 rounded-lg border border-primary/20">
+                  <div className="flex items-start gap-3">
+                    <AlertCircle className="h-5 w-5 text-primary mt-0.5" />
+                    <div>
+                      <h4 className="font-medium text-foreground">Important Notice</h4>
+                      <p className="text-muted-foreground text-sm">
+                        This is a potential condition based on your symptoms. This is not a diagnosis. 
+                        Always consult with a qualified healthcare provider for proper medical diagnosis and treatment.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         );
       
       case 5: // Review
-        const diseases = getPotentialDiseases();
         return (
           <div className="space-y-6">
             <div className="bg-muted/50 p-4 rounded-lg border border-border">
@@ -472,21 +538,14 @@ export default function SymptomsPage() {
             </div>
 
             <div className="bg-muted/50 p-4 rounded-lg border border-border">
-              <h3 className="font-medium mb-2">Potential Conditions</h3>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {diseases.length > 0 ? (
-                  diseases.map((disease) => (
-                    <div
-                      key={disease}
-                      className="bg-secondary/10 text-secondary rounded-full px-3 py-1 text-sm"
-                    >
-                      {disease}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground text-sm">No conditions identified</p>
-                )}
-              </div>
+              <h3 className="font-medium mb-2">Potential Condition</h3>
+              {predictedDisease ? (
+                <div className="bg-secondary/10 text-secondary rounded-full px-3 py-1 text-sm inline-block">
+                  {predictedDisease}
+                </div>
+              ) : (
+                <p className="text-muted-foreground text-sm">No condition identified</p>
+              )}
             </div>
             
             <div className="bg-muted/50 p-4 rounded-lg border border-border">
@@ -654,10 +713,12 @@ export default function SymptomsPage() {
             </Button>
             <Button
               onClick={handleNext}
+              disabled={isLoading}
               className="rounded-full"
             >
+              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {currentStep === steps.length - 1 ? "Get Recommendations" : "Next"}
-              {currentStep !== steps.length - 1 && (
+              {!isLoading && currentStep !== steps.length - 1 && (
                 <ChevronRight className="ml-2 h-4 w-4" />
               )}
             </Button>
