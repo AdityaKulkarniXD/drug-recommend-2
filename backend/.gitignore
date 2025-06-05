@@ -1,0 +1,12 @@
+.env
+/venv310
+# Ignore all .pyc files
+*.pyc
+# Ignore all .pyo files
+*.pyo   
+# Ignore all .pyd files
+*.pyd   
+/results
+/model
+/model.zip
+/results.zip
